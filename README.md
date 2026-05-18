@@ -56,6 +56,7 @@ Mark slides and interactions:
 - Session paths across visible sections.
 
 See [Tracking Guide](docs/tracking.md) for supported tags, events, fields, and privacy notes.
+See [Product Journey](docs/product-journey.md) for DeckLens boundaries and adjacent CloudBTL modules.
 
 ## Product Boundary
 
