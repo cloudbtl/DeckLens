@@ -246,20 +246,6 @@ CloudBTL as a whole should answer: "How do we create, send, learn from, and impr
 
 Keeping that separation prevents DeckLens from becoming too broad while still making it the first essential layer of the CloudBTL system.
 
-## Immediate Module Direction
-
-Build now:
-
-- DeckLens
-- CloudBTL Convert
-
-Document and prepare:
-
-- CloudBTL Rooms
-- CloudBTL Studio
-
-Rooms can borrow full-funnel B2B revenue patterns from tools like Re:catch, but CloudBTL should stay narrower: proposal rooms, buyer engagement, and follow-up signals rather than a full generic CRM.
-
 ## Language Principle
 
 Default language:
