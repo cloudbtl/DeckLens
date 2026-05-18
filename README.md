@@ -1,6 +1,6 @@
 # DeckLens
 
-HTML slide decks와 web proposal에 Google Analytics처럼 행동 계측을 붙이는 MVP입니다.
+DeckLens adds Google Analytics-style behavior tracking to HTML slide decks and web proposals.
 
 DeckLens is English-first for global users, with Korean UI support for local teams and early CloudBTL operations.
 
@@ -67,4 +67,4 @@ Local use is free. Real analytics requires either self-hosting the collector or 
 ## Repository
 
 - Organization: https://github.com/cloudbtl
-- Target repo: https://github.com/cloudbtl/decklens
+- Target repo: https://github.com/cloudbtl/DeckLens
