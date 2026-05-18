@@ -55,6 +55,8 @@ Mark slides and interactions:
 - Click, hover, focus, input, and submit actions on interactive elements.
 - Session paths across visible sections.
 
+See [Tracking Guide](docs/tracking.md) for supported tags, events, fields, and privacy notes.
+
 ## Product Boundary
 
 Local use is free. Real analytics requires either self-hosting the collector or using the hosted CloudBTL collector.
