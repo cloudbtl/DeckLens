@@ -14,9 +14,13 @@ function formatMs(ms) {
   return `${minutes}m ${seconds % 60}s`;
 }
 
+function t(key, fallback) {
+  return window.DeckLensI18n ? window.DeckLensI18n.t(key, fallback) : fallback;
+}
+
 function renderTable(target, rows, columns) {
   if (!rows.length) {
-    target.innerHTML = '<p class="muted empty">아직 수집된 데이터가 없습니다.</p>';
+    target.innerHTML = `<p class="muted empty">${escapeHtml(t("dashboard.empty", "No data collected yet."))}</p>`;
     return;
   }
 
@@ -39,7 +43,7 @@ function renderTable(target, rows, columns) {
 
 function renderHeatmap(target, sections) {
   if (!sections.length) {
-    target.innerHTML = '<p class="muted empty">아직 수집된 섹션 체류 데이터가 없습니다.</p>';
+    target.innerHTML = `<p class="muted empty">${escapeHtml(t("dashboard.emptySections", "No section dwell data collected yet."))}</p>`;
     return;
   }
 
@@ -65,7 +69,7 @@ function renderHeatmap(target, sections) {
 
 function renderPaths(target, paths) {
   if (!paths.length) {
-    target.innerHTML = '<p class="muted empty">아직 세션 이동 경로가 없습니다.</p>';
+    target.innerHTML = `<p class="muted empty">${escapeHtml(t("dashboard.emptyPaths", "No session paths collected yet."))}</p>`;
     return;
   }
 
@@ -117,6 +121,7 @@ async function load() {
 
 load();
 setInterval(load, 5000);
+window.addEventListener("decklens:languagechange", load);
 
 document.getElementById("clear-data").addEventListener("click", async () => {
   await fetch("/api/events", { method: "DELETE" });

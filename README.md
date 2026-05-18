@@ -2,6 +2,8 @@
 
 HTML slide decks와 web proposal에 Google Analytics처럼 행동 계측을 붙이는 MVP입니다.
 
+DeckLens is English-first for global users, with Korean UI support for local teams and early CloudBTL operations.
+
 ## Concept
 
 - Open source: slide instrumentation SDK and future converter.

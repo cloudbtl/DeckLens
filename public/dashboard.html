@@ -1,25 +1,27 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DeckLens Dashboard</title>
     <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/i18n.js"></script>
     <script defer src="/dashboard.js"></script>
   </head>
   <body>
     <header class="topbar">
       <a href="/">DeckLens</a>
-      <a href="/demo/slides.html">Demo Deck</a>
+      <a data-i18n="nav.demo" href="/demo/slides.html">Demo Deck</a>
+      <a data-lang-toggle href="?lang=ko">한국어</a>
     </header>
     <main class="page">
       <section class="intro">
         <p class="eyebrow">Analytics</p>
-        <h1>행동 분석 대시보드</h1>
-        <p>페이지와 섹션 체류, 클릭, hover, 입력, 제출 이벤트를 로컬 collector에서 바로 확인합니다.</p>
+        <h1 data-i18n="dashboard.title">Behavior analytics dashboard</h1>
+        <p data-i18n="dashboard.body">Review page dwell, section dwell, clicks, hover, input, and submit events from the local collector.</p>
         <div class="actions">
-          <a class="button secondary" href="/demo/slides.html">데모 열기</a>
-          <button class="secondary" id="clear-data" type="button">로컬 데이터 초기화</button>
+          <a class="button secondary" data-i18n="dashboard.openDemo" href="/demo/slides.html">Open demo</a>
+          <button class="secondary" data-i18n="dashboard.clear" id="clear-data" type="button">Clear local data</button>
         </div>
       </section>
       <section class="metrics" id="metrics"></section>

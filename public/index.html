@@ -1,41 +1,43 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DeckLens</title>
     <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/i18n.js"></script>
   </head>
   <body>
     <header class="topbar">
       <a href="/">DeckLens</a>
-      <a href="/demo/slides.html">Demo Deck</a>
-      <a href="/dashboard.html">Dashboard</a>
+      <a data-i18n="nav.demo" href="/demo/slides.html">Demo Deck</a>
+      <a data-i18n="nav.dashboard" href="/dashboard.html">Dashboard</a>
+      <a data-lang-toggle href="?lang=ko">한국어</a>
     </header>
     <main class="page">
       <section class="intro">
-        <p class="eyebrow">CloudBTL / Open SDK + Hosted Analytics</p>
-        <h1>HTML 슬라이드의 모든 읽기와 상호작용을 계측합니다.</h1>
-        <p>
-          변환기와 SDK는 오픈소스로 배포하고, 실제 이벤트 수집 서버와 대시보드는 호스팅으로 제공합니다.
+        <p class="eyebrow" data-i18n="home.eyebrow">CloudBTL / Open SDK + Hosted Analytics</p>
+        <h1 data-i18n="home.title">Measure every read and interaction in HTML proposals.</h1>
+        <p data-i18n="home.body">
+          Ship the converter and SDK as open source, then monetize hosted event collection, storage, dashboards, and team workflows.
         </p>
         <div class="actions">
-          <a class="button" href="/demo/slides.html">데모 슬라이드 열기</a>
-          <a class="button secondary" href="/dashboard.html">대시보드 보기</a>
+          <a class="button" data-i18n="home.demo" href="/demo/slides.html">Open demo</a>
+          <a class="button secondary" data-i18n="home.dashboard" href="/dashboard.html">View dashboard</a>
         </div>
       </section>
       <section class="columns">
         <article>
           <h2>SDK</h2>
-          <p>`data-slide-id`, `section`, `article`, `data-track` 기반으로 섹션 체류와 액션 이벤트를 수집합니다.</p>
+          <p data-i18n="home.sdk.body">Collect section dwell and action events from `data-slide-id`, `section`, `article`, and `data-track` markup.</p>
         </article>
         <article>
           <h2>Collector</h2>
-          <p>로컬에서는 자유롭게 테스트하고, 실서비스 데이터는 호스팅 수집 서버로 전송합니다.</p>
+          <p data-i18n="home.collector.body">Test freely with the local collector, then send production behavior data to a hosted collector.</p>
         </article>
         <article>
           <h2>Marketer View</h2>
-          <p>어떤 섹션을 오래 봤는지, 어떤 CTA에 hover/click/input이 있었는지 히트맵으로 보여줍니다.</p>
+          <p data-i18n="home.marketer.body">See which sections held attention and which CTAs received hover, click, focus, or input actions.</p>
         </article>
       </section>
       <section class="codeblock">

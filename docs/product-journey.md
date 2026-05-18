@@ -2,6 +2,8 @@
 
 CloudBTL should cover the full journey from proposal creation to delivery, measurement, feedback, and iteration. DeckLens is the analytics layer inside that journey, not the whole product surface.
 
+CloudBTL should be English-first for global BTL, proposal, agency, and sales users. Korean should be supported as a secondary language for domestic teams, operators, and early customer development, but the default product language, docs, examples, and public positioning should be English.
+
 ## End-to-End Journey
 
 1. Create
@@ -243,3 +245,19 @@ DeckLens should answer: "What did the recipient do with this web proposal?"
 CloudBTL as a whole should answer: "How do we create, send, learn from, and improve BTL materials with AI and measurable web workflows?"
 
 Keeping that separation prevents DeckLens from becoming too broad while still making it the first essential layer of the CloudBTL system.
+
+## Language Principle
+
+Default language:
+
+- English
+
+Supported secondary language:
+
+- Korean
+
+Product implications:
+
+- Public docs, examples, event names, SDK APIs, and hosted UI defaults should be English.
+- Korean support should be implemented through localization, not by forking product concepts or APIs.
+- Internal notes can be Korean, but public product language should assume global English-speaking users first.

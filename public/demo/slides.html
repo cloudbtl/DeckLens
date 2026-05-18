@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DeckLens Demo Proposal</title>
     <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/i18n.js"></script>
     <script defer src="/sdk/decklens.js"></script>
     <script defer src="/demo/slides.js"></script>
   </head>
@@ -13,54 +14,53 @@
       <section class="slide hero" data-slide-id="cover">
         <p class="eyebrow">CloudBTL</p>
         <h1>DeckLens Demo Proposal</h1>
-        <p>HTML 슬라이드를 보는 순서, 체류 시간, 클릭 행동까지 자동 계측합니다.</p>
-        <button data-track data-track-name="cover_cta">데모 시작</button>
+        <p data-i18n="demo.cover.body">Automatically measure reading order, dwell time, clicks, hover, and input behavior in an HTML proposal.</p>
+        <button data-i18n="demo.cover.cta" data-track data-track-name="cover_cta">Start demo</button>
       </section>
 
       <section class="slide" data-slide-id="problem">
         <p class="eyebrow">Problem</p>
-        <h2>제안서는 보내지만, 어디서 설득됐는지 모릅니다.</h2>
+        <h2 data-i18n="demo.problem.title">You send proposals, but you cannot see what persuaded the recipient.</h2>
         <div class="grid">
-          <button data-track data-track-name="problem_attention">관심 구간</button>
-          <button data-track data-track-name="problem_dropoff">이탈 구간</button>
-          <button data-track data-track-name="problem_question">질문 발생</button>
+          <button data-i18n="demo.problem.attention" data-track data-track-name="problem_attention">Attention section</button>
+          <button data-i18n="demo.problem.dropoff" data-track data-track-name="problem_dropoff">Drop-off section</button>
+          <button data-i18n="demo.problem.question" data-track data-track-name="problem_question">Question raised</button>
         </div>
       </section>
 
       <section class="slide" data-slide-id="solution">
         <p class="eyebrow">Solution</p>
-        <h2>HTML 슬라이드에 GA처럼 붙는 계측 SDK</h2>
+        <h2 data-i18n="demo.solution.title">Analytics SDK for HTML proposals, like GA for decks</h2>
         <label class="slider">
-          관여도 시뮬레이션
+          <span data-i18n="demo.solution.slider">Engagement simulation</span>
           <input data-track data-track-name="engagement_slider" type="range" min="0" max="100" value="64" />
         </label>
         <form class="inline-form" data-track data-track-name="demo_form">
           <input data-track data-track-name="email_interest" type="email" placeholder="team@company.com" />
-          <button data-track data-track-name="request_followup" type="submit">후속 미팅 요청</button>
+          <button data-i18n="demo.solution.submit" data-track data-track-name="request_followup" type="submit">Request follow-up</button>
         </form>
-        <a data-track data-track-name="pricing_link" href="/dashboard.html">분석 대시보드 보기</a>
+        <a data-i18n="demo.solution.dashboard" data-track data-track-name="pricing_link" href="/dashboard.html">View analytics dashboard</a>
       </section>
 
       <section class="slide" data-slide-id="business">
         <p class="eyebrow">Business</p>
-        <h2>변환기는 오픈소스, 데이터 수집 서버는 호스팅</h2>
-        <p>로컬 테스트는 자유롭게. 실제 고객 행동 데이터를 모으려면 직접 구축하거나 CloudBTL 호스팅 collector를 사용합니다.</p>
+        <h2 data-i18n="demo.business.title">Open-source converter and SDK, hosted data collection</h2>
+        <p data-i18n="demo.business.body">Test locally for free. For real customer behavior data, self-host the collector or use the hosted CloudBTL collector.</p>
         <div class="grid">
           <a data-track data-track-name="github_repo" href="https://github.com/cloudbtl/DeckLens">GitHub</a>
-          <button data-track data-track-name="export_report">리포트 내보내기</button>
+          <button data-i18n="demo.business.export" data-track data-track-name="export_report">Export report</button>
         </div>
       </section>
 
       <section class="slide" data-slide-id="long-read">
         <p class="eyebrow">Long Page</p>
-        <h2>긴 HTML 제안서도 섹션 단위로 체류 시간을 나눠 봅니다.</h2>
-        <p>
-          슬라이드형 페이지뿐 아니라 아래로 긴 랜딩 페이지, 제안서, 브로슈어에서도 각 섹션이 얼마 동안
-          보였는지 수집합니다. CTA hover와 클릭은 액션 테이블에 따로 집계됩니다.
+        <h2 data-i18n="demo.long.title">Long HTML proposals are measured section by section.</h2>
+        <p data-i18n="demo.long.body">
+          DeckLens works on slide-style pages, long landing pages, proposals, and brochures. It measures how long each section was visible and separates CTA hover and click actions into action analytics.
         </p>
         <div class="grid">
-          <button data-track data-track-name="long_read_primary">관심 있음</button>
-          <button data-track data-track-name="long_read_secondary">나중에 보기</button>
+          <button data-i18n="demo.long.primary" data-track data-track-name="long_read_primary">Interested</button>
+          <button data-i18n="demo.long.secondary" data-track data-track-name="long_read_secondary">Review later</button>
         </div>
       </section>
     </main>
