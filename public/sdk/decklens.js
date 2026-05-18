@@ -1,6 +1,20 @@
 (function () {
   const DEFAULT_ENDPOINT = "/api/events";
   const DEFAULT_FLUSH_INTERVAL = 5000;
+  const ACTION_SELECTOR = [
+    "a",
+    "button",
+    "input",
+    "textarea",
+    "select",
+    "summary",
+    "[role='button']",
+    "[role='link']",
+    "[onclick]",
+    "[tabindex]",
+    "[contenteditable='true']",
+    "[data-track]"
+  ].join(",");
 
   function now() {
     return Date.now();
@@ -8,7 +22,11 @@
 
   function uuid() {
     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
-    return `pv_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+    return `dl_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+  }
+
+  function safeText(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
   }
 
   function getOrCreateSessionId(projectId) {
@@ -26,6 +44,9 @@
       deckId: document.title || "untitled-deck",
       endpoint: DEFAULT_ENDPOINT,
       flushInterval: DEFAULT_FLUSH_INTERVAL,
+      sectionSelector: "[data-decklens-section], [data-slide-id], section, article",
+      actionSelector: ACTION_SELECTOR,
+      visibilityThreshold: 0.25,
       debug: false,
       ...options
     };
@@ -34,10 +55,21 @@
     const userId = localStorage.getItem(`decklens:${config.projectId}:user`) || uuid();
     localStorage.setItem(`decklens:${config.projectId}:user`, userId);
 
+    const sectionMeta = new WeakMap();
+    const visibleSections = new Map();
+    const hoverStarts = new WeakMap();
+    const hoverCooldowns = new WeakMap();
     let queue = [];
-    let currentSlide = null;
-    let currentSlideStartedAt = now();
     let sequence = 0;
+    let started = false;
+
+    function pageInfo() {
+      return {
+        pageUrl: location.href,
+        pagePath: `${location.pathname}${location.search}${location.hash}`,
+        pageTitle: document.title || ""
+      };
+    }
 
     function baseEvent(type, data) {
       return {
@@ -47,9 +79,10 @@
         sessionId,
         userId,
         sequence: ++sequence,
-        pageUrl: location.href,
+        viewport: { width: window.innerWidth, height: window.innerHeight },
         userAgent: navigator.userAgent,
         occurredAt: new Date().toISOString(),
+        ...pageInfo(),
         ...data
       };
     }
@@ -78,102 +111,234 @@
       }).catch(() => {
         try {
           const failed = JSON.parse(payload).events;
-          queue = failed.concat(queue).slice(-200);
+          queue = failed.concat(queue).slice(-500);
         } catch {
           // Ignore malformed retry payloads.
         }
       });
     }
 
-    function closeSlide(nextSlideId) {
-      if (!currentSlide) return;
-      enqueue("slide_view", {
-        slideId: currentSlide,
-        durationMs: now() - currentSlideStartedAt,
-        nextSlideId
-      });
+    function sectionTitle(element) {
+      const explicit =
+        element.getAttribute("data-section-title") ||
+        element.getAttribute("aria-label") ||
+        element.getAttribute("data-track-name");
+      if (explicit) return safeText(explicit).slice(0, 120);
+
+      const heading = element.querySelector("h1, h2, h3, [data-section-heading]");
+      return safeText(heading ? heading.textContent : element.textContent).slice(0, 120) || "Untitled section";
     }
 
-    function viewSlide(slideId) {
-      if (!slideId || slideId === currentSlide) return;
-      closeSlide(slideId);
-      currentSlide = slideId;
-      currentSlideStartedAt = now();
-      enqueue("slide_enter", { slideId });
+    function getSectionMeta(element) {
+      if (sectionMeta.has(element)) return sectionMeta.get(element);
+      const sections = Array.from(document.querySelectorAll(config.sectionSelector));
+      const index = Math.max(0, sections.indexOf(element));
+      const id =
+        element.getAttribute("data-decklens-section") ||
+        element.getAttribute("data-slide-id") ||
+        element.id ||
+        `section-${index + 1}`;
+      const meta = {
+        sectionId: id,
+        sectionTitle: sectionTitle(element),
+        sectionIndex: index + 1
+      };
+      sectionMeta.set(element, meta);
+      return meta;
     }
 
-    function trackInteraction(element, eventType) {
-      const targetId = element.id || null;
-      const targetName =
+    function currentSectionFor(element) {
+      const section = element.closest(config.sectionSelector);
+      return section ? getSectionMeta(section) : null;
+    }
+
+    function targetMeta(element) {
+      const section = currentSectionFor(element);
+      const name =
         element.getAttribute("data-track-name") ||
         element.getAttribute("aria-label") ||
-        element.textContent.trim().slice(0, 80) ||
-        targetId ||
+        element.getAttribute("name") ||
+        safeText(element.textContent).slice(0, 80) ||
+        element.id ||
         element.tagName.toLowerCase();
 
-      enqueue("interaction", {
-        slideId: currentSlide,
-        targetId,
-        targetName,
-        eventType,
-        href: element.href || null
+      return {
+        targetId: element.id || null,
+        targetName: safeText(name).slice(0, 120),
+        targetTag: element.tagName.toLowerCase(),
+        targetType: element.getAttribute("type") || element.getAttribute("role") || null,
+        href: element.href || null,
+        sectionId: section ? section.sectionId : null,
+        sectionTitle: section ? section.sectionTitle : null,
+        sectionIndex: section ? section.sectionIndex : null
+      };
+    }
+
+    function closeSection(element, nextSectionId) {
+      const active = visibleSections.get(element);
+      if (!active) return;
+
+      const durationMs = now() - active.startedAt;
+      visibleSections.delete(element);
+      if (durationMs < 100) return;
+
+      enqueue("section_view", {
+        ...active.meta,
+        durationMs,
+        maxRatio: Number(active.maxRatio.toFixed(3)),
+        nextSectionId: nextSectionId || null
       });
     }
 
-    function observeSlides() {
-      const slides = Array.from(document.querySelectorAll("[data-slide-id]"));
-      if (!slides.length) return;
+    function openSection(element, ratio) {
+      if (visibleSections.has(element)) {
+        const active = visibleSections.get(element);
+        active.maxRatio = Math.max(active.maxRatio, ratio);
+        return;
+      }
 
-      const observer = new IntersectionObserver(
-        (entries) => {
-          const visible = entries
-            .filter((entry) => entry.isIntersecting)
-            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-          if (visible) viewSlide(visible.target.getAttribute("data-slide-id"));
-        },
-        { threshold: [0.6] }
-      );
-
-      slides.forEach((slide) => observer.observe(slide));
-      const firstVisible = slides.find((slide) => slide.getBoundingClientRect().top >= 0) || slides[0];
-      viewSlide(firstVisible.getAttribute("data-slide-id"));
+      const meta = getSectionMeta(element);
+      visibleSections.set(element, {
+        meta,
+        startedAt: now(),
+        maxRatio: ratio
+      });
+      enqueue("section_enter", {
+        ...meta,
+        ratio: Number(ratio.toFixed(3))
+      });
     }
 
-    function bindInteractions() {
+    function closeAllSections(nextSectionId) {
+      Array.from(visibleSections.keys()).forEach((element) => closeSection(element, nextSectionId));
+    }
+
+    function observeSections() {
+      const sections = Array.from(document.querySelectorAll(config.sectionSelector));
+      if (!sections.length) {
+        document.body.setAttribute("data-decklens-section", "document");
+        sections.push(document.body);
+      }
+
+      const thresholds = [0, config.visibilityThreshold, 0.5, 0.75, 1];
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio >= config.visibilityThreshold) {
+              openSection(entry.target, entry.intersectionRatio);
+            } else {
+              closeSection(entry.target);
+            }
+          });
+        },
+        { threshold: thresholds }
+      );
+
+      sections.forEach((section) => observer.observe(section));
+      scanVisibleSections(sections);
+    }
+
+    function scanVisibleSections(sections) {
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+        const ratio = rect.height > 0 ? Math.max(0, Math.min(1, visibleHeight / rect.height)) : 0;
+        if (ratio >= config.visibilityThreshold) openSection(section, ratio);
+      });
+    }
+
+    function trackAction(element, actionType, extra) {
+      enqueue("action", {
+        actionType,
+        ...targetMeta(element),
+        ...extra
+      });
+    }
+
+    function bindActions() {
       document.addEventListener("click", (event) => {
-        const tracked = event.target.closest("[data-track]");
-        if (tracked) trackInteraction(tracked, "click");
+        const target = event.target.closest(config.actionSelector);
+        if (target) trackAction(target, "click", { x: event.clientX, y: event.clientY });
+      });
+
+      document.addEventListener(
+        "pointerenter",
+        (event) => {
+          const target = event.target.closest(config.actionSelector);
+          if (target) hoverStarts.set(target, now());
+        },
+        true
+      );
+
+      document.addEventListener(
+        "pointerleave",
+        (event) => {
+          const target = event.target.closest(config.actionSelector);
+          if (!target || !hoverStarts.has(target)) return;
+
+          const durationMs = now() - hoverStarts.get(target);
+          hoverStarts.delete(target);
+          const lastTrackedAt = hoverCooldowns.get(target) || 0;
+          if (durationMs >= 250 && now() - lastTrackedAt > 1000) {
+            hoverCooldowns.set(target, now());
+            trackAction(target, "hover", { durationMs });
+          }
+        },
+        true
+      );
+
+      document.addEventListener("focusin", (event) => {
+        const target = event.target.closest(config.actionSelector);
+        if (target) trackAction(target, "focus", {});
       });
 
       document.addEventListener("input", (event) => {
-        const tracked = event.target.closest("[data-track]");
-        if (tracked) trackInteraction(tracked, "input");
+        const target = event.target.closest(config.actionSelector);
+        if (!target) return;
+        trackAction(target, "input", {
+          valueLength: typeof target.value === "string" ? target.value.length : null
+        });
+      });
+
+      document.addEventListener("submit", (event) => {
+        trackAction(event.target, "submit", {});
       });
     }
 
     function start() {
+      if (started) return;
+      started = true;
       enqueue("session_start", {
-        viewport: { width: window.innerWidth, height: window.innerHeight }
+        referrer: document.referrer || null,
+        documentHeight: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
       });
-      observeSlides();
-      bindInteractions();
+      const sections = Array.from(document.querySelectorAll(config.sectionSelector));
+      observeSections();
+      bindActions();
       setInterval(() => flush(false), config.flushInterval);
+
       window.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "hidden") {
-          closeSlide(null);
+          closeAllSections(null);
           flush(true);
-        } else if (currentSlide) {
-          currentSlideStartedAt = now();
+        } else {
+          scanVisibleSections(sections.length ? sections : [document.body]);
         }
       });
+
       window.addEventListener("beforeunload", () => {
-        closeSlide(null);
+        closeAllSections(null);
         enqueue("session_end", {});
         flush(true);
       });
     }
 
-    return { start, track: enqueue, viewSlide, flush };
+    return {
+      start,
+      track: enqueue,
+      flush,
+      closeAllSections
+    };
   }
 
   const api = { createTracker };

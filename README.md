@@ -1,6 +1,6 @@
 # DeckLens
 
-HTML slide decks에 Google Analytics처럼 행동 계측을 붙이는 MVP입니다.
+HTML slide decks와 web proposal에 Google Analytics처럼 행동 계측을 붙이는 MVP입니다.
 
 ## Concept
 
@@ -43,10 +43,17 @@ Mark slides and interactions:
 ## Events
 
 - `session_start`
-- `slide_enter`
-- `slide_view`
-- `interaction`
+- `section_enter`
+- `section_view`
+- `action`
 - `session_end`
+
+## What It Tracks
+
+- Section dwell time for slides, long pages, articles, and explicit `[data-decklens-section]` blocks.
+- Page-level rollups by URL path.
+- Click, hover, focus, input, and submit actions on interactive elements.
+- Session paths across visible sections.
 
 ## Product Boundary
 

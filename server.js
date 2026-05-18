@@ -60,33 +60,99 @@ function getEvents() {
 }
 
 function summarize(events) {
-  const bySlide = {};
-  const interactions = {};
+  const sections = {};
+  const actions = {};
+  const pages = {};
+  const pathsBySession = {};
   const sessions = new Set();
 
   for (const event of events) {
-    sessions.add(event.sessionId);
-    if (event.type === "slide_view") {
-      const key = event.slideId || "unknown";
-      bySlide[key] ||= { slideId: key, views: 0, totalMs: 0 };
-      bySlide[key].views += 1;
-      bySlide[key].totalMs += Number(event.durationMs || 0);
+    if (event.sessionId) sessions.add(event.sessionId);
+
+    if (event.type === "section_enter") {
+      const sessionKey = event.sessionId || "unknown";
+      pathsBySession[sessionKey] ||= [];
+      pathsBySession[sessionKey].push({
+        sectionId: event.sectionId || "unknown",
+        sectionTitle: event.sectionTitle || event.sectionId || "Unknown",
+        pagePath: event.pagePath || "/",
+        occurredAt: event.occurredAt
+      });
     }
-    if (event.type === "interaction") {
-      const key = event.targetName || event.targetId || "unknown";
-      interactions[key] ||= { target: key, count: 0 };
-      interactions[key].count += 1;
+
+    if (event.type === "section_view" || event.type === "slide_view") {
+      const pagePath = event.pagePath || "/";
+      const sectionId = event.sectionId || event.slideId || "unknown";
+      const sectionTitle = event.sectionTitle || sectionId;
+      const sectionKey = `${event.deckId || "deck"}::${pagePath}::${sectionId}`;
+      const durationMs = Number(event.durationMs || 0);
+
+      sections[sectionKey] ||= {
+        pagePath,
+        sectionId,
+        sectionTitle,
+        sectionIndex: event.sectionIndex || 0,
+        views: 0,
+        totalMs: 0,
+        maxRatio: 0
+      };
+      sections[sectionKey].views += 1;
+      sections[sectionKey].totalMs += durationMs;
+      sections[sectionKey].maxRatio = Math.max(sections[sectionKey].maxRatio, Number(event.maxRatio || 0));
+
+      pages[pagePath] ||= { pagePath, views: 0, totalMs: 0 };
+      pages[pagePath].views += 1;
+      pages[pagePath].totalMs += durationMs;
+    }
+
+    if (event.type === "action" || event.type === "interaction") {
+      const actionType = event.actionType || event.eventType || "interaction";
+      const target = event.targetName || event.targetId || "unknown";
+      const key = `${actionType}::${target}::${event.pagePath || "/"}`;
+      actions[key] ||= {
+        actionType,
+        target,
+        targetTag: event.targetTag || null,
+        pagePath: event.pagePath || "/",
+        sectionId: event.sectionId || event.slideId || null,
+        sectionTitle: event.sectionTitle || null,
+        count: 0,
+        totalHoverMs: 0
+      };
+      actions[key].count += 1;
+      if (actionType === "hover") actions[key].totalHoverMs += Number(event.durationMs || 0);
     }
   }
+
+  const sectionRows = Object.values(sections);
+  const maxSectionMs = sectionRows.reduce((max, section) => Math.max(max, section.totalMs), 0);
 
   return {
     sessions: sessions.size,
     events: events.length,
-    slides: Object.values(bySlide).map((slide) => ({
-      ...slide,
-      avgMs: slide.views ? Math.round(slide.totalMs / slide.views) : 0
-    })),
-    interactions: Object.values(interactions).sort((a, b) => b.count - a.count)
+    pages: Object.values(pages)
+      .map((page) => ({
+        ...page,
+        avgMs: page.views ? Math.round(page.totalMs / page.views) : 0
+      }))
+      .sort((a, b) => b.totalMs - a.totalMs),
+    sections: sectionRows
+      .map((section) => ({
+        ...section,
+        avgMs: section.views ? Math.round(section.totalMs / section.views) : 0,
+        heat: maxSectionMs ? Number((section.totalMs / maxSectionMs).toFixed(3)) : 0
+      }))
+      .sort((a, b) => a.pagePath.localeCompare(b.pagePath) || a.sectionIndex - b.sectionIndex),
+    actions: Object.values(actions)
+      .map((action) => ({
+        ...action,
+        avgHoverMs: action.count ? Math.round(action.totalHoverMs / action.count) : 0
+      }))
+      .sort((a, b) => b.count - a.count),
+    paths: Object.entries(pathsBySession)
+      .map(([sessionId, path]) => ({ sessionId, path: path.slice(-25) }))
+      .slice(-20),
+    recentEvents: events.slice(-50).reverse()
   };
 }
 
@@ -144,6 +210,12 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && req.url === "/api/events") {
     send(res, 200, JSON.stringify(getEvents().slice(-500)));
+    return;
+  }
+
+  if (req.method === "DELETE" && req.url === "/api/events") {
+    fs.writeFileSync(EVENTS_FILE, "");
+    send(res, 200, JSON.stringify({ ok: true }));
     return;
   }
 
