@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Open analytics SDK and hosted collector for HTML slide decks.",
   "scripts": {
+    "convert": "node modules/convert/cli.js",
     "dev": "node server.js",
     "start": "node server.js"
   },

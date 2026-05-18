@@ -59,6 +59,13 @@ Mark slides and interactions:
 
 See [Tracking Guide](docs/tracking.md) for supported tags, events, fields, and privacy notes.
 See [Product Journey](docs/product-journey.md) for DeckLens boundaries and adjacent CloudBTL modules.
+See [Re:catch Benchmark Notes](docs/recatch-benchmark.md) for positioning notes on adjacent B2B revenue workflows.
+
+## CloudBTL Modules
+
+- [Convert](modules/convert/README.md): convert proposal files into AI-ready, analytics-ready HTML.
+- [Rooms](modules/rooms/README.md): buyer-facing delivery layer for tracked proposal links.
+- [Studio](modules/studio/README.md): long-term web-native proposal editor direction.
 
 ## Product Boundary
 
