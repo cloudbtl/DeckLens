@@ -1,0 +1,24 @@
+{
+  "name": "decklens",
+  "version": "0.1.0",
+  "description": "Open analytics SDK and hosted collector for HTML slide decks.",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "slides",
+    "analytics",
+    "presentation",
+    "html"
+  ],
+  "homepage": "https://cloudbtl.com/decklens",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cloudbtl/decklens.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cloudbtl/decklens/issues"
+  },
+  "license": "MIT"
+}

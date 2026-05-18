@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeckLens Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/dashboard.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="/">DeckLens</a>
+      <a href="/demo/slides.html">Demo Deck</a>
+    </header>
+    <main class="page">
+      <section class="intro">
+        <p class="eyebrow">Analytics</p>
+        <h1>슬라이드 행동 대시보드</h1>
+        <p>이 로컬 서버는 우리가 임대할 수 있는 이벤트 수집 서버의 최소 형태입니다.</p>
+      </section>
+      <section class="metrics" id="metrics"></section>
+      <section>
+        <h2>Slide Views</h2>
+        <div id="slides" class="table"></div>
+      </section>
+      <section>
+        <h2>Interactions</h2>
+        <div id="interactions" class="table"></div>
+      </section>
+    </main>
+  </body>
+</html>

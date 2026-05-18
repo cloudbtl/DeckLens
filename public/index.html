@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeckLens</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="/">DeckLens</a>
+      <a href="/demo/slides.html">Demo Deck</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </header>
+    <main class="page">
+      <section class="intro">
+        <p class="eyebrow">CloudBTL / Open SDK + Hosted Analytics</p>
+        <h1>HTML 슬라이드의 모든 읽기와 상호작용을 계측합니다.</h1>
+        <p>
+          변환기와 SDK는 오픈소스로 배포하고, 실제 이벤트 수집 서버와 대시보드는 호스팅으로 제공합니다.
+        </p>
+        <div class="actions">
+          <a class="button" href="/demo/slides.html">데모 슬라이드 열기</a>
+          <a class="button secondary" href="/dashboard.html">대시보드 보기</a>
+        </div>
+      </section>
+      <section class="columns">
+        <article>
+          <h2>SDK</h2>
+          <p>`data-slide-id`와 `data-track`만 붙이면 화면 체류, 넘김 순서, 클릭/입력 이벤트를 수집합니다.</p>
+        </article>
+        <article>
+          <h2>Collector</h2>
+          <p>로컬에서는 자유롭게 테스트하고, 실서비스 데이터는 호스팅 수집 서버로 전송합니다.</p>
+        </article>
+        <article>
+          <h2>Marketer View</h2>
+          <p>어떤 제안 페이지가 먹혔는지, 어떤 CTA를 눌렀는지, 어디서 이탈했는지 보여줍니다.</p>
+        </article>
+      </section>
+      <section class="codeblock">
+        <h2>Agent-friendly install</h2>
+        <pre><code>&lt;script src="https://cdn.cloudbtl.com/decklens.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+DeckLens.createTracker({
+  projectId: "brand-proposal",
+  deckId: "2026-q2-proposal",
+  endpoint: "https://collector.cloudbtl.com/api/events"
+}).start();
+&lt;/script&gt;</code></pre>
+      </section>
+    </main>
+  </body>
+</html>

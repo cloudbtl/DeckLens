@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeckLens Demo Proposal</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/sdk/decklens.js"></script>
+    <script defer src="/demo/slides.js"></script>
+  </head>
+  <body class="deck">
+    <main>
+      <section class="slide hero" data-slide-id="cover">
+        <p class="eyebrow">CloudBTL</p>
+        <h1>DeckLens Demo Proposal</h1>
+        <p>HTML 슬라이드를 보는 순서, 체류 시간, 클릭 행동까지 자동 계측합니다.</p>
+        <button data-track data-track-name="cover_cta">데모 시작</button>
+      </section>
+
+      <section class="slide" data-slide-id="problem">
+        <p class="eyebrow">Problem</p>
+        <h2>제안서는 보내지만, 어디서 설득됐는지 모릅니다.</h2>
+        <div class="grid">
+          <button data-track data-track-name="problem_attention">관심 구간</button>
+          <button data-track data-track-name="problem_dropoff">이탈 구간</button>
+          <button data-track data-track-name="problem_question">질문 발생</button>
+        </div>
+      </section>
+
+      <section class="slide" data-slide-id="solution">
+        <p class="eyebrow">Solution</p>
+        <h2>HTML 슬라이드에 GA처럼 붙는 계측 SDK</h2>
+        <label class="slider">
+          관여도 시뮬레이션
+          <input data-track data-track-name="engagement_slider" type="range" min="0" max="100" value="64" />
+        </label>
+        <a data-track data-track-name="pricing_link" href="/dashboard.html">분석 대시보드 보기</a>
+      </section>
+
+      <section class="slide" data-slide-id="business">
+        <p class="eyebrow">Business</p>
+        <h2>변환기는 오픈소스, 데이터 수집 서버는 호스팅</h2>
+        <p>로컬 테스트는 자유롭게. 실제 고객 행동 데이터를 모으려면 직접 구축하거나 CloudBTL 호스팅 collector를 사용합니다.</p>
+      </section>
+    </main>
+  </body>
+</html>
