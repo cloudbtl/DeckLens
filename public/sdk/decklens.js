@@ -1,3 +1,16 @@
+/*!
+ * DeckLens SDK v0.2 — section-level reading analytics.
+ * Open-source instrumentation. Hosted storage/dashboards: CloudBTL (cloudbtl.com).
+ *
+ * v0.2 (2026-07-28): CloudBTL event-contract alignment
+ *  - userId → visitorId (CloudBTL Event.visitor_id)
+ *  - options.sessionId / visitorId / linkId injectable (host page decides identity)
+ *  - transport: "fetch" (default) | "postMessage" — sandboxed iframes can't reach
+ *    the API origin, so events relay to the parent frame instead
+ *  - section events carry target=sectionId, action events target=targetName
+ *    (maps onto CloudBTL's events.target column; everything else lands in payload)
+ *  - storage access is best-effort: opaque-origin iframes throw on *Storage
+ */
 (function () {
   const DEFAULT_ENDPOINT = "/api/events";
   const DEFAULT_FLUSH_INTERVAL = 5000;
@@ -29,12 +42,29 @@
     return String(value || "").replace(/\s+/g, " ").trim();
   }
 
-  function getOrCreateSessionId(projectId) {
-    const key = `decklens:${projectId}:session`;
-    const existing = sessionStorage.getItem(key);
+  // 샌드박스(opaque origin) iframe 에선 storage 접근 자체가 throw — 전부 best-effort.
+  function storageGet(store, key) {
+    try {
+      return window[store].getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  function storageSet(store, key, value) {
+    try {
+      window[store].setItem(key, value);
+    } catch {
+      /* opaque origin — 무시 */
+    }
+  }
+
+  function persistentId(scope, kind, store) {
+    const key = `decklens:${scope}:${kind}`;
+    const existing = storageGet(store, key);
     if (existing) return existing;
     const created = uuid();
-    sessionStorage.setItem(key, created);
+    storageSet(store, key, created);
     return created;
   }
 
@@ -42,18 +72,21 @@
     const config = {
       projectId: "demo",
       deckId: document.title || "untitled-deck",
+      linkId: null, // CloudBTL 공유 링크 컨텍스트 — 있으면 모든 이벤트에 실림
       endpoint: DEFAULT_ENDPOINT,
+      transport: "fetch", // "fetch" | "postMessage"
       flushInterval: DEFAULT_FLUSH_INTERVAL,
       sectionSelector: "[data-decklens-section], [data-slide-id], section, article",
       actionSelector: ACTION_SELECTOR,
       visibilityThreshold: 0.25,
+      sessionId: null, // 호스트가 주입 가능 (미지정 시 sessionStorage 기반 생성)
+      visitorId: null, // 호스트가 주입 가능 (미지정 시 localStorage 기반 생성)
       debug: false,
       ...options
     };
 
-    const sessionId = getOrCreateSessionId(config.projectId);
-    const userId = localStorage.getItem(`decklens:${config.projectId}:user`) || uuid();
-    localStorage.setItem(`decklens:${config.projectId}:user`, userId);
+    const sessionId = config.sessionId || persistentId(config.projectId, "session", "sessionStorage");
+    const visitorId = config.visitorId || persistentId(config.projectId, "visitor", "localStorage");
 
     const sectionMeta = new WeakMap();
     const visibleSections = new Map();
@@ -72,19 +105,20 @@
     }
 
     function baseEvent(type, data) {
-      return {
+      const event = {
         type,
         projectId: config.projectId,
         deckId: config.deckId,
         sessionId,
-        userId,
+        visitorId,
         sequence: ++sequence,
         viewport: { width: window.innerWidth, height: window.innerHeight },
-        userAgent: navigator.userAgent,
         occurredAt: new Date().toISOString(),
         ...pageInfo(),
         ...data
       };
+      if (config.linkId) event.linkId = config.linkId;
+      return event;
     }
 
     function enqueue(type, data) {
@@ -96,8 +130,18 @@
 
     function flush(useBeacon) {
       if (!queue.length) return;
-      const payload = JSON.stringify({ events: queue.splice(0, queue.length) });
+      const events = queue.splice(0, queue.length);
 
+      if (config.transport === "postMessage") {
+        try {
+          window.parent.postMessage({ __decklens: 1, events }, "*");
+        } catch {
+          /* 부모 없음 — 드랍 */
+        }
+        return;
+      }
+
+      const payload = JSON.stringify({ events });
       if (useBeacon && navigator.sendBeacon) {
         navigator.sendBeacon(config.endpoint, new Blob([payload], { type: "application/json" }));
         return;
@@ -109,12 +153,7 @@
         body: payload,
         keepalive: true
       }).catch(() => {
-        try {
-          const failed = JSON.parse(payload).events;
-          queue = failed.concat(queue).slice(-500);
-        } catch {
-          // Ignore malformed retry payloads.
-        }
+        queue = events.concat(queue).slice(-500);
       });
     }
 
@@ -163,8 +202,8 @@
         element.tagName.toLowerCase();
 
       return {
+        target: safeText(name).slice(0, 120), // CloudBTL events.target
         targetId: element.id || null,
-        targetName: safeText(name).slice(0, 120),
         targetTag: element.tagName.toLowerCase(),
         targetType: element.getAttribute("type") || element.getAttribute("role") || null,
         href: element.href || null,
@@ -184,6 +223,7 @@
 
       enqueue("section_view", {
         ...active.meta,
+        target: active.meta.sectionId, // CloudBTL events.target = 섹션 id
         durationMs,
         maxRatio: Number(active.maxRatio.toFixed(3)),
         nextSectionId: nextSectionId || null
@@ -205,6 +245,7 @@
       });
       enqueue("section_enter", {
         ...meta,
+        target: meta.sectionId,
         ratio: Number(ratio.toFixed(3))
       });
     }
@@ -308,7 +349,8 @@
     function start() {
       if (started) return;
       started = true;
-      enqueue("session_start", {
+      enqueue("section_session_start", {
+        target: "document",
         referrer: document.referrer || null,
         documentHeight: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
       });
@@ -328,7 +370,7 @@
 
       window.addEventListener("beforeunload", () => {
         closeAllSections(null);
-        enqueue("session_end", {});
+        enqueue("section_session_end", { target: "document" });
         flush(true);
       });
     }

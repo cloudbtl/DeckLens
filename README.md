@@ -42,13 +42,16 @@ Mark slides and interactions:
 <button data-track data-track-name="pricing_cta">Contact</button>
 ```
 
-## Events
+## Events (v0.2 — CloudBTL contract)
 
-- `session_start`
-- `section_enter`
-- `section_view`
-- `action`
-- `session_end`
+- `section_session_start` / `section_session_end`
+- `section_enter` / `section_view` (dwell + max visibility per section)
+- `action` (click, hover, focus, input, submit)
+
+Each event carries `sessionId` / `visitorId` (injectable), an optional `linkId`
+context, and a `target` field that maps onto CloudBTL's events table.
+`transport: "postMessage"` relays events to a parent frame for sandboxed
+iframe embeds (this is how the CloudBTL viewer consumes the SDK).
 
 ## What It Tracks
 
@@ -62,7 +65,10 @@ See [Product Journey](docs/product-journey.md) for DeckLens boundaries and adjac
 
 ## Product Boundary
 
-Local use is free. Real analytics requires either self-hosting the collector or using the hosted CloudBTL collector.
+The SDK, spec, and demo are open source. Storage, dashboards, team access, and
+share-link tracking are the hosted product: **CloudBTL** (https://cloudbtl.com).
+The CloudBTL document viewer ships this SDK for section-level read analytics —
+DeckLens is the instrumentation edge, CloudBTL is the home.
 
 ## Repository
 
