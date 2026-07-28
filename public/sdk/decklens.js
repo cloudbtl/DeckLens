@@ -265,8 +265,14 @@
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting && entry.intersectionRatio >= config.visibilityThreshold) {
-              openSection(entry.target, entry.intersectionRatio);
+            // 가시성 = max(요소 대비 비율, 뷰포트 점유율). 긴 섹션(문서보다 큰 body 폴백
+            // 포함)은 요소 대비 비율이 구조적으로 낮아 뷰포트 점유율로도 판정한다.
+            const viewportCover = window.innerHeight
+              ? (entry.intersectionRect ? entry.intersectionRect.height : 0) / window.innerHeight
+              : 0;
+            const ratio = Math.max(entry.intersectionRatio, viewportCover);
+            if (entry.isIntersecting && ratio >= config.visibilityThreshold) {
+              openSection(entry.target, ratio);
             } else {
               closeSection(entry.target);
             }
@@ -283,7 +289,11 @@
       sections.forEach((section) => {
         const rect = section.getBoundingClientRect();
         const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-        const ratio = rect.height > 0 ? Math.max(0, Math.min(1, visibleHeight / rect.height)) : 0;
+        const elemRatio = rect.height > 0 ? Math.max(0, Math.min(1, visibleHeight / rect.height)) : 0;
+        const viewportCover = window.innerHeight
+          ? Math.max(0, Math.min(1, visibleHeight / window.innerHeight))
+          : 0;
+        const ratio = Math.max(elemRatio, viewportCover);
         if (ratio >= config.visibilityThreshold) openSection(section, ratio);
       });
     }
