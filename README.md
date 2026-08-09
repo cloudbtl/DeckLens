@@ -6,8 +6,10 @@ DeckLens is English-first for global users, with Korean UI support for local tea
 
 ## Concept
 
-- Open source: slide instrumentation SDK and future converter.
-- Hosted business: event collector, storage, dashboard, team access, export, alerts.
+- Open source: slide/document instrumentation SDK, event spec, and demo.
+- Hosting: storage, dashboards, team access, export, and alerts are **CloudBTL**
+  (https://cloudbtl.com) — DeckLens does not run its own hosted collector.
+  The bundled `server.js` is a local demo only. See [Product Boundary](#product-boundary).
 - Target users: marketers and proposal teams who send HTML-based pitch decks.
 
 ## Run
