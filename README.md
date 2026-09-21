@@ -1,6 +1,6 @@
 # DeckLens
 
-DeckLens adds Google Analytics-style behavior tracking to HTML slide decks and web proposals.
+DeckLens is CloudBTL's open-source browser instrumentation edge. It records section visibility, dwell and explicit actions inside HTML decks and web proposals; the hosted CloudBTL product owns ingestion, storage, workspaces, dashboards and document descriptors.
 
 DeckLens is English-first for global users, with Korean UI support for local teams and early CloudBTL operations.
 
@@ -71,6 +71,8 @@ The SDK, spec, and demo are open source. Storage, dashboards, team access, and
 share-link tracking are the hosted product: **CloudBTL** (https://cloudbtl.com).
 The CloudBTL document viewer ships this SDK for section-level read analytics —
 DeckLens is the instrumentation edge, CloudBTL is the home.
+
+DeckLens events may become descriptors or ranking signals in CloudBTL, but this repository does not choose documents, build Smartlake trees, or run JevRAG. That boundary keeps the SDK small enough to embed in customer pages without importing the storage and retrieval stack.
 
 ## Repository
 
