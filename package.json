@@ -1,10 +1,11 @@
 {
   "name": "decklens",
   "version": "0.1.0",
-  "description": "Open analytics SDK and hosted collector for HTML slide decks.",
+  "description": "Open browser instrumentation for section visibility, dwell and explicit actions in web documents.",
   "scripts": {
     "dev": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --check server.js && node --check public/sdk/decklens.js && node --check public/dashboard.js"
   },
   "keywords": [
     "slides",
@@ -15,10 +16,10 @@
   "homepage": "https://cloudbtl.com/decklens",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cloudbtl/decklens.git"
+    "url": "git+https://github.com/cloudbtl/DeckLens.git"
   },
   "bugs": {
-    "url": "https://github.com/cloudbtl/decklens/issues"
+    "url": "https://github.com/cloudbtl/DeckLens/issues"
   },
   "license": "Apache-2.0"
 }

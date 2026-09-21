@@ -4,6 +4,15 @@ DeckLens is CloudBTL's open-source browser instrumentation edge. It records sect
 
 DeckLens is English-first for global users, with Korean UI support for local teams and early CloudBTL operations.
 
+## Design principles
+
+- **Observe, do not infer.** The SDK emits browser events; interpretation and recommendations belong downstream.
+- **Minimize collection.** DeckLens records named interactions and timing, never raw form values or document bodies.
+- **The host owns identity.** `sessionId`, `visitorId` and `linkId` are injected by the embedding product or generated as opaque local IDs.
+- **Keep the edge small.** The browser SDK has no storage, workspace, billing or retrieval dependency.
+- **Use a stable event contract.** New fields are additive, and hosted consumers must tolerate unknown fields.
+- **Separate demo from production.** `server.js` is a local collector for development; it is not a hardened hosted service.
+
 ## Concept
 
 - Open source: slide/document instrumentation SDK, event spec, and demo.
@@ -78,3 +87,11 @@ DeckLens events may become descriptors or ranking signals in CloudBTL, but this 
 
 - Organization: https://github.com/cloudbtl
 - Target repo: https://github.com/cloudbtl/DeckLens
+
+## Security and privacy
+
+Read [SECURITY.md](SECURITY.md) before reporting a vulnerability. Applications embedding DeckLens are responsible for consent, retention and access controls appropriate to their users and jurisdiction.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
