@@ -141,16 +141,16 @@ Every event includes common metadata:
 | `projectId` | Project configured in `createTracker`. |
 | `deckId` | Deck/page asset configured in `createTracker`. |
 | `sessionId` | Session-scoped anonymous ID stored in `sessionStorage`. |
-| `userId` | Browser-scoped anonymous ID stored in `localStorage`. |
+| `visitorId` | Browser-scoped anonymous ID stored in `localStorage`, or an opaque ID supplied by the host. |
 | `sequence` | Incrementing event sequence number per page runtime. |
 | `viewport` | Current viewport width and height. |
-| `userAgent` | Browser user agent. |
 | `occurredAt` | Client-side ISO timestamp. |
 | `pageUrl` | Full page URL. |
 | `pagePath` | Path, search, and hash. |
 | `pageTitle` | Current document title. |
+| `linkId` | Optional opaque share-link context supplied by the host. |
 
-### `session_start`
+### `section_session_start`
 
 Emitted when tracking starts.
 
@@ -201,7 +201,7 @@ Additional fields:
 | --- | --- |
 | `actionType` | `click`, `hover`, `focus`, `input`, or `submit`. |
 | `targetId` | Element `id`, or `null`. |
-| `targetName` | Human-readable target name. |
+| `target` | Human-readable target name. |
 | `targetTag` | Lowercase element tag name. |
 | `targetType` | Element `type` or `role`, or `null`. |
 | `href` | Link URL when available. |
@@ -212,7 +212,7 @@ Additional fields:
 | `durationMs` | Hover duration for `hover`. |
 | `valueLength` | Input value length for `input`. |
 
-### `session_end`
+### `section_session_end`
 
 Emitted on `beforeunload` after open section views are closed.
 
@@ -245,7 +245,7 @@ Custom events receive the same common metadata as built-in events. The local das
 
 ## Privacy Notes
 
-DeckLens currently collects URL, page title, viewport, user agent, anonymous session/user IDs, section metadata, action metadata, click coordinates, hover duration, and input length. It does not collect raw input values.
+DeckLens currently collects URL, page title, viewport, anonymous session and visitor IDs, section metadata, action metadata, click coordinates, hover duration, and input length. It does not collect raw input values.
 
 Before using a hosted collector in production, add:
 
